@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pixel Tracker – Academic Demo</title>
+  <style>
+    body { font-family: sans-serif; max-width: 640px; margin: 3rem auto; line-height: 1.6; color: #222; }
+    h1 { color: #111; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    pre  { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
+    a    { color: #0070f3; }
+    .note { background: #fff8e1; border-left: 4px solid #f0c040; padding: 0.6rem 1rem; margin: 1rem 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Email Pixel Tracker</h1>
+  <p>Academic demonstration of email open tracking via a 1&times;1 transparent GIF.</p>
+
+  <h2>How it works</h2>
+  <p>
+    When an HTML email contains an <code>&lt;img&gt;</code> tag pointing to this server,
+    the recipient's email client fetches the image on open. The server records the
+    timestamp, IP address, user-agent, and any custom tracking ID — then returns the
+    invisible pixel so the recipient notices nothing.
+  </p>
+
+  <h2>Embed in an email</h2>
+  <pre>&lt;img
+  src="https://YOUR-DOMAIN.vercel.app/api/pixel?id=YOUR_ID"
+  width="1" height="1" style="opacity:0;"
+/&gt;</pre>
+
+  <p>Replace <code>YOUR_ID</code> with any label (e.g. <code>laptop_test</code>) to
+  identify which email or recipient triggered the hit.</p>
+
+  <h2>Live test</h2>
+  <p>Click the link below to fire a test hit, then check
+  <strong>Vercel dashboard → your project → Functions → Logs</strong>.</p>
+  <p><a href="/api/pixel?id=manual_test">Fire test pixel &rarr;</a></p>
+
+  <div class="note">
+    <strong>Note:</strong> This project is for academic research only.
+    It demonstrates how email tracking pixels work at a technical level.
+  </div>
+
+  <!-- fires automatically on page load so you can see a hit in logs immediately -->
+  <img src="/api/pixel?id=page_load" width="1" height="1" style="opacity:0;" alt="" />
+</body>
+</html>
