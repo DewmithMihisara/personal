@@ -1,501 +1,616 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pixel Tracker – Academic Demo</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Email Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f0f2f5;
-      color: #222;
-      padding: 2rem 1rem 4rem;
-    }
+  :root {
+    --sidebar-w: 220px;
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --bg: #f8f9fb;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --grey-bg: #f3f4f6;
+    --radius: 10px;
+  }
 
-    .page { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+  }
 
-    /* ── cards ── */
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-      padding: 1.75rem;
-    }
-    .card-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .badge {
-      background: #0070f3;
-      color: #fff;
-      border-radius: 999px;
-      padding: 1px 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: #1e1b4b;
+    color: #c7d2fe;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 10;
+  }
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo span { color: #818cf8; }
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #a5b4fc;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .nav-item.active { background: var(--accent); color: #fff; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-    /* ── send form ── */
-    .send-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
-    .send-grid .full { grid-column: 1 / -1; }
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 36px;
+    max-width: 1200px;
+  }
 
-    label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 0.3rem;
-      margin-top: 0.75rem;
-    }
-    label:first-child { margin-top: 0; }
+  .page { display: none; }
+  .page.active { display: block; }
 
-    input, textarea {
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 0.55rem 0.75rem;
-      font-size: 0.92rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input:focus, textarea:focus { border-color: #0070f3; box-shadow: 0 0 0 3px rgba(0,112,243,0.12); }
-    textarea { resize: vertical; min-height: 80px; }
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
 
-    .btn {
-      border: none;
-      border-radius: 6px;
-      padding: 0.6rem 1.25rem;
-      font-size: 0.92rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s, opacity 0.15s;
-    }
-    .btn-primary { background: #0070f3; color: #fff; }
-    .btn-primary:hover { background: #005dd1; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-ghost {
-      background: transparent;
-      color: #555;
-      border: 1px solid #ddd;
-      padding: 0.45rem 0.9rem;
-      font-size: 0.82rem;
-    }
-    .btn-ghost:hover { background: #f5f5f5; }
-    .btn-danger { background: #fff0f0; color: #c0392b; border: 1px solid #f5c6c6; font-size: 0.82rem; padding: 0.45rem 0.9rem; }
-    .btn-danger:hover { background: #ffe0e0; }
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-value.rate { color: var(--accent); }
 
-    .form-footer { margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+  /* ── Chart card ── */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .chart-title { font-size: 15px; font-weight: 600; }
+  .range-tabs { display: flex; gap: 4px; }
+  .range-tab {
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .range-tab:hover { background: var(--bg); }
+  .range-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .chart-wrap { position: relative; height: 240px; }
 
-    .status {
-      flex: 1;
-      padding: 0.55rem 0.85rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      display: none;
-    }
-    .status.success { background: #e6f4ea; color: #1a7f37; display: block; }
-    .status.error   { background: #fdecea; color: #c0392b; display: block; }
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
 
-    .tracking-chip {
-      font-family: monospace;
-      font-size: 0.8rem;
-      background: #eef6ff;
-      color: #0050b3;
-      border: 1px solid #bfdbfe;
-      border-radius: 4px;
-      padding: 1px 6px;
-    }
+  /* ── Form ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  input, textarea {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    transition: border 0.15s;
+    font-family: inherit;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 100px; }
+  .btn {
+    padding: 9px 22px;
+    border-radius: 7px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-sm { padding: 6px 14px; font-size: 13px; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-outline:hover { background: var(--bg); }
+  .form-footer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .send-status { font-size: 13px; }
+  .send-status.ok  { color: var(--green); }
+  .send-status.err { color: #dc2626; }
 
-    /* ── hits table ── */
-    .table-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-    .auto-label {
-      font-size: 0.8rem;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-left: auto;
-    }
-    .auto-label input[type=checkbox] { accent-color: #0070f3; }
+  /* ── Table ── */
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .table-header-title { font-size: 15px; font-weight: 600; }
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .status-pill.opened  { background: var(--green-bg); color: var(--green); }
+  .status-pill.pending { background: var(--grey-bg);  color: var(--muted); }
+  .truncate {
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .empty-row td { text-align: center; padding: 40px; color: var(--muted); }
 
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.83rem;
-    }
-    thead th {
-      background: #f8f9fa;
-      text-align: left;
-      padding: 0.6rem 0.75rem;
-      font-weight: 600;
-      color: #555;
-      border-bottom: 2px solid #eee;
-      white-space: nowrap;
-    }
-    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
-    tbody tr:hover { background: #fafbff; }
-    tbody tr.new-hit { animation: flash 1.2s ease; }
-    @keyframes flash {
-      0%   { background: #e8f0fe; }
-      100% { background: transparent; }
-    }
-    tbody td {
-      padding: 0.55rem 0.75rem;
-      vertical-align: top;
-      color: #333;
-    }
-    .cell-id     { font-family: monospace; color: #0050b3; font-size: 0.8rem; white-space: nowrap; }
-    .cell-time   { white-space: nowrap; color: #555; }
-    .cell-ip     { font-family: monospace; font-size: 0.8rem; white-space: nowrap; }
-    .cell-loc    { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #444; }
-    .cell-os     { white-space: nowrap; color: #444; }
-    .cell-client { white-space: nowrap; color: #333; font-weight: 500; }
-    .cell-lang   { white-space: nowrap; color: #666; font-size: 0.8rem; }
-
-    /* pill tags */
-    .pill {
-      display: inline-block;
-      padding: 1px 7px;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 600;
-    }
-    .pill-proxy  { background: #fff3cd; color: #856404; }
-    .pill-direct { background: #d1fae5; color: #065f46; }
-
-    /* legend */
-    .legend {
-      margin-top: 1.5rem;
-      border-top: 1px solid #eee;
-      padding-top: 1rem;
-    }
-    .legend-title { font-size: 0.82rem; font-weight: 700; color: #444; margin-bottom: 0.6rem; }
-    .legend-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 0.35rem 1.5rem;
-    }
-    .legend-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #555; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .dot-yes { background: #22c55e; }
-    .dot-no  { background: #d1d5db; }
-
-    .empty-row td {
-      text-align: center;
-      padding: 2.5rem;
-      color: #aaa;
-      font-style: italic;
-    }
-
-    /* ── pagination ── */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .page-info { font-size: 0.82rem; color: #666; }
-    .page-btns { display: flex; gap: 0.4rem; }
-    .page-btn {
-      border: 1px solid #ddd;
-      background: #fff;
-      border-radius: 5px;
-      padding: 0.3rem 0.7rem;
-      font-size: 0.82rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.1s;
-    }
-    .page-btn:hover:not(:disabled) { background: #f0f4ff; border-color: #0070f3; color: #0070f3; }
-    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .page-btn.active { background: #0070f3; color: #fff; border-color: #0070f3; }
-
-    .memory-note {
-      font-size: 0.78rem;
-      color: #888;
-      margin-top: 1rem;
-      text-align: center;
-    }
-  </style>
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 16px;
+  }
+  .pg-btn {
+    padding: 5px 11px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    background: #fff;
+    color: var(--text);
+    transition: all 0.12s;
+  }
+  .pg-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .pg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pg-info { font-size: 13px; color: var(--muted); margin-right: 8px; }
+</style>
 </head>
 <body>
-<div class="page">
 
-  <!-- ── Send Form ── -->
-  <div class="card">
-    <div class="card-title">Send Tracked Email</div>
-    <form id="sendForm">
-      <div class="send-grid">
-        <div>
-          <label for="to">To</label>
-          <input type="email" id="to" placeholder="recipient@example.com" required />
-        </div>
-        <div>
-          <label for="subject">Subject</label>
-          <input type="text" id="subject" placeholder="Test tracked email" required />
-        </div>
-        <div class="full">
-          <label for="message">Message <span style="font-weight:400;color:#aaa">(optional)</span></label>
-          <textarea id="message" placeholder="Hi, this is a tracked test email."></textarea>
-        </div>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">Email<span>Tracker</span></div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" id="nav-home" onclick="showPage('home')">
+      <span class="nav-icon">&#9783;</span> Home
+    </div>
+    <div class="nav-item" id="nav-emails" onclick="showPage('emails')">
+      <span class="nav-icon">&#9993;</span> Emails
+    </div>
+  </nav>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- HOME PAGE -->
+  <section class="page active" id="page-home">
+    <h1 class="page-title">Dashboard</h1>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Sent</div>
+        <div class="stat-value" id="stat-sent">—</div>
       </div>
-      <div class="form-footer">
-        <button type="submit" class="btn btn-primary" id="sendBtn">Send Email</button>
-        <div class="status" id="status"></div>
+      <div class="stat-card">
+        <div class="stat-label">Total Opened</div>
+        <div class="stat-value" id="stat-opened">—</div>
       </div>
-    </form>
-  </div>
-
-  <!-- ── Hits Dashboard ── -->
-  <div class="card">
-    <div class="card-title">
-      Collected Data
-      <span class="badge" id="totalBadge">0</span>
-    </div>
-
-    <div class="table-toolbar">
-      <button class="btn btn-ghost" id="refreshBtn">↻ Refresh</button>
-      <button class="btn btn-danger" id="clearBtn">✕ Clear</button>
-      <label class="auto-label">
-        <input type="checkbox" id="autoRefresh" checked />
-        Auto-refresh (5 s)
-      </label>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Tracking ID</th>
-            <th>Open Time</th>
-            <th>IP Address</th>
-            <th>Approx. Location</th>
-            <th>OS / Device</th>
-            <th>Email Client</th>
-            <th>Language</th>
-          </tr>
-        </thead>
-        <tbody id="hitsBody"></tbody>
-      </table>
-    </div>
-
-    <div class="pagination">
-      <span class="page-info" id="pageInfo">Showing 0 – 0 of 0</span>
-      <div class="page-btns" id="pageBtns"></div>
-    </div>
-
-    <p class="memory-note">
-      Data is stored in server memory only — no database. Clears when the server restarts.
-    </p>
-
-    <!-- ── What is / isn't collected ── -->
-    <div class="legend">
-      <div class="legend-title">What this pixel collects</div>
-      <div class="legend-grid">
-        <div class="legend-row"><span class="dot dot-yes"></span>IP Address</div>
-        <div class="legend-row"><span class="dot dot-yes"></span>Approx. Location (via IP geolocation)</div>
-        <div class="legend-row"><span class="dot dot-yes"></span>OS + Device Type (User-Agent)</div>
-        <div class="legend-row"><span class="dot dot-yes"></span>Email Client (User-Agent)</div>
-        <div class="legend-row"><span class="dot dot-yes"></span>Preferred Language</div>
-        <div class="legend-row"><span class="dot dot-yes"></span>Open Timestamp</div>
-        <div class="legend-row"><span class="dot dot-no"></span>MAC Address — never leaves local network</div>
-        <div class="legend-row"><span class="dot dot-no"></span>Exact Email Address — not transmitted</div>
+      <div class="stat-card">
+        <div class="stat-label">Open Rate</div>
+        <div class="stat-value rate" id="stat-rate">—</div>
       </div>
     </div>
-  </div>
 
-</div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Sent vs Opened</div>
+        <div class="range-tabs">
+          <button class="range-tab active" onclick="setRange('week')">Week</button>
+          <button class="range-tab" onclick="setRange('month')">Month</button>
+          <button class="range-tab" onclick="setRange('year')">Year</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="emailChart"></canvas>
+      </div>
+    </div>
+  </section>
 
-<!-- fire a page-load hit for instant demo -->
-<img src="/api/pixel?id=page_load" width="1" height="1" style="opacity:0;position:absolute;" alt="" />
+  <!-- EMAILS PAGE -->
+  <section class="page" id="page-emails">
+    <h1 class="page-title">Emails</h1>
+
+    <!-- Send form -->
+    <div class="card">
+      <div class="card-title">Send Tracked Email</div>
+      <form id="sendForm" onsubmit="sendEmail(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="companyName">Company Name</label>
+            <input id="companyName" type="text" placeholder="Acme Corp" required />
+          </div>
+          <div class="form-group">
+            <label for="recipientName">Recipient Name</label>
+            <input id="recipientName" type="text" placeholder="John Smith" required />
+          </div>
+          <div class="form-group">
+            <label for="toEmail">To (Email)</label>
+            <input id="toEmail" type="email" placeholder="client@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <input id="subject" type="text" placeholder="Partnership Opportunity" required />
+          </div>
+          <div class="form-group full">
+            <label for="body">Message</label>
+            <textarea id="body" placeholder="Write your email body here..." required></textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-primary" type="submit" id="sendBtn">Send Email</button>
+          <span class="send-status" id="sendStatus"></span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Emails table -->
+    <div class="card">
+      <div class="table-header">
+        <div class="table-header-title">Sent Emails</div>
+        <button class="btn btn-outline btn-sm" onclick="loadEmails()">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Recipient</th>
+              <th>Email</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Sent At</th>
+              <th>Opened At</th>
+            </tr>
+          </thead>
+          <tbody id="emailTableBody">
+            <tr class="empty-row"><td colspan="8">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </section>
+
+</main>
 
 <script>
-  /* ── state ── */
-  const PAGE_SIZE = 10;
-  let allHits  = [];
-  let currentPage = 1;
-  let prevTotal   = 0;
-  let autoTimer   = null;
+// ── State ──
+let chartInstance = null;
+let chartData     = null;
+let currentRange  = "week";
+let currentPage   = 1;
 
-  /* ── helpers ── */
-  function fmtTime(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString() + " " + d.toLocaleTimeString();
+// ── Navigation ──
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("page-" + page).classList.add("active");
+  document.getElementById("nav-" + page).classList.add("active");
+  if (page === "home")   loadStats();
+  if (page === "emails") loadEmails();
+}
+
+// ── Stats / Chart ──
+async function loadStats() {
+  try {
+    const r    = await fetch("/api/stats");
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+
+    document.getElementById("stat-sent").textContent   = data.totalSent;
+    document.getElementById("stat-opened").textContent = data.totalOpened;
+    const rate = data.totalSent > 0
+      ? Math.round((data.totalOpened / data.totalSent) * 100) + "%"
+      : "0%";
+    document.getElementById("stat-rate").textContent = rate;
+
+    chartData = data.chart;
+    renderChart(currentRange);
+  } catch (e) {
+    console.error("Stats error:", e);
+  }
+}
+
+function setRange(range) {
+  currentRange = range;
+  document.querySelectorAll(".range-tab").forEach(t => {
+    t.classList.toggle("active", t.textContent.toLowerCase() === range);
+  });
+  if (chartData) renderChart(range);
+}
+
+function renderChart(range) {
+  const d   = chartData[range];
+  const ctx = document.getElementById("emailChart").getContext("2d");
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: d.labels,
+      datasets: [
+        {
+          label: "Sent",
+          data: d.sent,
+          borderColor: "#4f46e5",
+          backgroundColor: "rgba(79,70,229,0.08)",
+          tension: 0.35,
+          fill: true,
+          pointRadius: 3,
+        },
+        {
+          label: "Opened",
+          data: d.opened,
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22,163,74,0.08)",
+          tension: 0.35,
+          fill: true,
+          pointRadius: 3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+// ── Send Email ──
+async function sendEmail(e) {
+  e.preventDefault();
+  const btn    = document.getElementById("sendBtn");
+  const status = document.getElementById("sendStatus");
+  btn.disabled = true;
+  status.textContent = "Sending…";
+  status.className   = "send-status";
+
+  try {
+    const r = await fetch("/api/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyName:   document.getElementById("companyName").value.trim(),
+        recipientName: document.getElementById("recipientName").value.trim(),
+        to:            document.getElementById("toEmail").value.trim(),
+        subject:       document.getElementById("subject").value.trim(),
+        body:          document.getElementById("body").value.trim(),
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Unknown error");
+
+    status.textContent = "Email sent successfully!";
+    status.className   = "send-status ok";
+    document.getElementById("sendForm").reset();
+    loadEmails();
+  } catch (err) {
+    status.textContent = "Error: " + err.message;
+    status.className   = "send-status err";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Emails Table ──
+async function loadEmails(page) {
+  if (page !== undefined) currentPage = page;
+  const tbody = document.getElementById("emailTableBody");
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Loading...</td></tr>';
+
+  try {
+    const r    = await fetch(`/api/emails?page=${currentPage}`);
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+
+    renderTable(data.emails);
+    renderPagination(data.page, data.totalPages);
+  } catch (err) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Error: ${esc(err.message)}</td></tr>`;
+  }
+}
+
+function renderTable(emails) {
+  const tbody  = document.getElementById("emailTableBody");
+  const offset = (currentPage - 1) * 50;
+
+  if (!emails || !emails.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No emails sent yet.</td></tr>';
+    return;
   }
 
-  function totalPages() {
-    return Math.max(1, Math.ceil(allHits.length / PAGE_SIZE));
-  }
+  tbody.innerHTML = emails.map((em, i) => `
+    <tr>
+      <td>${offset + i + 1}</td>
+      <td class="truncate" title="${esc(em.company_name)}">${esc(em.company_name)}</td>
+      <td class="truncate" title="${esc(em.recipient_name)}">${esc(em.recipient_name)}</td>
+      <td class="truncate" title="${esc(em.email_to)}">${esc(em.email_to)}</td>
+      <td class="truncate" title="${esc(em.subject)}">${esc(em.subject)}</td>
+      <td><span class="status-pill ${em.status.toLowerCase()}">${em.status}</span></td>
+      <td style="white-space:nowrap">${fmtDate(em.sent_at)}</td>
+      <td style="white-space:nowrap">${em.opened_at ? fmtDate(em.opened_at) : "—"}</td>
+    </tr>
+  `).join("");
+}
 
-  /* ── render table ── */
-  function renderTable(isNew) {
-    const body  = document.getElementById("hitsBody");
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const slice = allHits.slice(start, start + PAGE_SIZE);
+function renderPagination(page, totalPages) {
+  const el = document.getElementById("pagination");
+  if (totalPages <= 1) { el.innerHTML = ""; return; }
 
-    if (allHits.length === 0) {
-      body.innerHTML = `<tr class="empty-row"><td colspan="8">No hits yet. Send a tracked email and open it to see data here.</td></tr>`;
+  let html = `<span class="pg-info">Page ${page} of ${totalPages}</span>`;
+  html += `<button class="pg-btn" onclick="loadEmails(${page - 1})" ${page <= 1 ? "disabled" : ""}>&lsaquo; Prev</button>`;
+
+  for (const p of paginationRange(page, totalPages)) {
+    if (p === "…") {
+      html += `<button class="pg-btn" disabled>…</button>`;
     } else {
-      body.innerHTML = slice.map((h, i) => {
-        const rowNum    = start + i + 1;
-        const isNewRow  = isNew && i < (allHits.length - prevTotal);
-        const isProxy   = /proxy|googleimage|yahoo/i.test(h.emailClient);
-        const clientTag = isProxy
-          ? `<span class="pill pill-proxy">via proxy</span> `
-          : `<span class="pill pill-direct">direct</span> `;
-        return `<tr class="${isNewRow ? "new-hit" : ""}">
-          <td>${rowNum}</td>
-          <td class="cell-id">${esc(h.id)}</td>
-          <td class="cell-time">${fmtTime(h.timestamp)}</td>
-          <td class="cell-ip">${esc(h.ip)}</td>
-          <td class="cell-loc" title="${esc(h.location)}">${esc(h.location)}</td>
-          <td class="cell-os" title="${esc(h.userAgent)}">${esc(h.os)} · ${esc(h.device)}</td>
-          <td class="cell-client">${clientTag}${esc(h.emailClient)}</td>
-          <td class="cell-lang">${esc(h.language)}</td>
-        </tr>`;
-      }).join("");
+      html += `<button class="pg-btn ${p === page ? "active" : ""}" onclick="loadEmails(${p})">${p}</button>`;
     }
-
-    /* page info */
-    const shown = allHits.length === 0 ? 0 : `${start + 1}–${Math.min(start + PAGE_SIZE, allHits.length)}`;
-    document.getElementById("pageInfo").textContent =
-      `Showing ${shown} of ${allHits.length}`;
-
-    /* badge */
-    document.getElementById("totalBadge").textContent = allHits.length;
-
-    renderPagination();
   }
 
-  function renderPagination() {
-    const tp   = totalPages();
-    const wrap = document.getElementById("pageBtns");
-    let html   = "";
+  html += `<button class="pg-btn" onclick="loadEmails(${page + 1})" ${page >= totalPages ? "disabled" : ""}>Next &rsaquo;</button>`;
+  el.innerHTML = html;
+}
 
-    html += `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>&laquo; Prev</button>`;
+function paginationRange(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = [1];
+  if (current > 3) pages.push("…");
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) pages.push(p);
+  if (current < total - 2) pages.push("…");
+  pages.push(total);
+  return pages;
+}
 
-    for (let p = 1; p <= tp; p++) {
-      if (tp > 7 && Math.abs(p - currentPage) > 2 && p !== 1 && p !== tp) {
-        if (p === currentPage - 3 || p === currentPage + 3) html += `<button class="page-btn" disabled>…</button>`;
-        continue;
-      }
-      html += `<button class="page-btn ${p === currentPage ? "active" : ""}" onclick="goPage(${p})">${p}</button>`;
-    }
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
-    html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === tp ? "disabled" : ""}>Next &raquo;</button>`;
-    wrap.innerHTML = html;
-  }
+function fmtDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    + " " + d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+}
 
-  function goPage(p) {
-    const tp = totalPages();
-    if (p < 1 || p > tp) return;
-    currentPage = p;
-    renderTable(false);
-  }
-  window.goPage = goPage; // expose for inline onclick
-
-  function esc(s) {
-    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  }
-
-  /* ── fetch hits ── */
-  async function fetchHits(showNew) {
-    try {
-      const res  = await fetch("/api/hits");
-      const data = await res.json();
-      const wasCount = allHits.length;
-      allHits = data.hits || [];
-      if (allHits.length > wasCount && currentPage > totalPages()) currentPage = 1;
-      renderTable(showNew && allHits.length > prevTotal);
-      prevTotal = allHits.length;
-    } catch (_) { /* silent on network error during auto-refresh */ }
-  }
-
-  /* ── auto-refresh ── */
-  function startAuto() {
-    autoTimer = setInterval(() => fetchHits(true), 5000);
-  }
-  function stopAuto() {
-    clearInterval(autoTimer);
-  }
-
-  document.getElementById("autoRefresh").addEventListener("change", e => {
-    e.target.checked ? startAuto() : stopAuto();
-  });
-
-  document.getElementById("refreshBtn").addEventListener("click", () => fetchHits(true));
-
-  /* ── clear ── */
-  document.getElementById("clearBtn").addEventListener("click", async () => {
-    if (!confirm("Clear all collected hits from memory?")) return;
-    await fetch("/api/hits", { method: "DELETE" });
-    prevTotal = 0;
-    currentPage = 1;
-    fetchHits(false);
-  });
-
-  /* ── send form ── */
-  const sendForm = document.getElementById("sendForm");
-  const sendBtn  = document.getElementById("sendBtn");
-  const statusEl = document.getElementById("status");
-
-  sendForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    sendBtn.disabled = true;
-    sendBtn.textContent = "Sending…";
-    statusEl.className = "status";
-    statusEl.innerHTML = "";
-
-    try {
-      const res  = await fetch("/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to:      document.getElementById("to").value.trim(),
-          subject: document.getElementById("subject").value.trim(),
-          message: document.getElementById("message").value.trim(),
-        }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        statusEl.className = "status success";
-        statusEl.innerHTML = `Email sent! Tracking ID: <span class="tracking-chip">${esc(data.trackingId)}</span>`;
-        sendForm.reset();
-        setTimeout(() => fetchHits(true), 500);
-      } else {
-        statusEl.className = "status error";
-        statusEl.textContent = "Error: " + (data.error || "Unknown error");
-      }
-    } catch (err) {
-      statusEl.className = "status error";
-      statusEl.textContent = "Network error: " + err.message;
-    } finally {
-      sendBtn.disabled = false;
-      sendBtn.textContent = "Send Email";
-    }
-  });
-
-  /* ── init ── */
-  fetchHits(false);
-  startAuto();
+// Init
+loadStats();
 </script>
 </body>
 </html>

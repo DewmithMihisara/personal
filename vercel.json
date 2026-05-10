@@ -1,7 +1,6 @@
 {
     "version": 2,
     "rewrites": [
-        { "source": "/api/pixel", "destination": "/api/tracker?action=pixel" },
-        { "source": "/api/hits",  "destination": "/api/tracker?action=hits"  }
+        { "source": "/api/pixel", "destination": "/api/tracker" }
     ]
 }
