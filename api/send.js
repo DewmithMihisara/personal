@@ -11,8 +11,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Fields 'to' and 'subject' are required." });
     }
 
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-        return res.status(500).json({ error: "Server email credentials are not configured." });
+    if (!process.env.GMAIL_USER) {
+        return res.status(500).json({ error: "GMAIL_USER environment variable is not set." });
+    }
+    if (!process.env.GMAIL_APP_PASSWORD) {
+        return res.status(500).json({ error: "GMAIL_APP_PASSWORD environment variable is not set." });
     }
 
     const baseUrl =
