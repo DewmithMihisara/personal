@@ -76,7 +76,7 @@ export default async function handler(req, res) {
             chart: { week, month, year },
         });
     } catch (err) {
-        // console.error("[stats] DB query failed:", err.message, "| code:", err.code);
+        console.error("[stats] DB query failed:", err.message, "| code:", err.code);
         res.status(500).json({ error: err.message });
     }
 }
