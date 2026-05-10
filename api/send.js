@@ -51,6 +51,7 @@ export default async function handler(req, res) {
             [trackingId, companyName, recipientName, to, subject, body]
         );
     } catch (err) {
+        console.error("[send] DB insert failed:", err.message, "| code:", err.code, "| DATABASE_URL set:", !!process.env.DATABASE_URL);
         return res.status(500).json({ error: `Database error: ${err.message}` });
     }
 
@@ -73,6 +74,7 @@ export default async function handler(req, res) {
         });
         res.status(200).json({ success: true, trackingId });
     } catch (err) {
+        console.error("[send] Nodemailer failed:", err.message);
         await pool.query("DELETE FROM emails WHERE tracking_id = $1", [trackingId]);
         res.status(500).json({ error: err.message });
     }

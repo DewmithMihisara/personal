@@ -27,6 +27,7 @@ export default async function handler(req, res) {
 
         res.status(200).json({ emails: rows.rows, total, page, totalPages });
     } catch (err) {
+        console.error("[emails] DB query failed:", err.message, "| code:", err.code);
         res.status(500).json({ error: err.message });
     }
 }

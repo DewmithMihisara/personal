@@ -10,8 +10,8 @@ export default async function handler(req, res) {
                  WHERE tracking_id = $1 AND status = 'PENDING'`,
                 [trackingId]
             );
-        } catch {
-            // Don't block pixel delivery on DB errors
+        } catch (err) {
+            console.error("[tracker] DB update failed:", err.message, "| code:", err.code);
         }
     }
 
