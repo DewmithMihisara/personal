@@ -4,21 +4,21 @@ async function buildChart(range) {
     let trunc, interval, labelFn, points;
 
     if (range === "week") {
-        trunc    = "day";
+        trunc = "day";
         interval = "6 days";
-        points   = 7;
-        labelFn  = (d) => new Date(d).toLocaleDateString("en-US", { weekday: "short" });
+        points = 7;
+        labelFn = (d) => new Date(d).toLocaleDateString("en-US", { weekday: "short" });
     } else if (range === "year") {
-        trunc    = "month";
+        trunc = "month";
         interval = "11 months";
-        points   = 12;
-        labelFn  = (d) => new Date(d).toLocaleDateString("en-US", { month: "short" });
+        points = 12;
+        labelFn = (d) => new Date(d).toLocaleDateString("en-US", { month: "short" });
     } else {
         // month
-        trunc    = "day";
+        trunc = "day";
         interval = "29 days";
-        points   = 30;
-        labelFn  = (d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        points = 30;
+        labelFn = (d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     }
 
     const sql = `
@@ -45,7 +45,7 @@ async function buildChart(range) {
 
     return {
         labels: rows.map((r) => labelFn(r.bucket)),
-        sent:   rows.map((r) => parseInt(r.sent)   || 0),
+        sent: rows.map((r) => parseInt(r.sent) || 0),
         opened: rows.map((r) => parseInt(r.opened) || 0),
     };
 }
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
             chart: { week, month, year },
         });
     } catch (err) {
-        console.error("[stats] DB query failed:", err.message, "| code:", err.code);
+        // console.error("[stats] DB query failed:", err.message, "| code:", err.code);
         res.status(500).json({ error: err.message });
     }
 }
