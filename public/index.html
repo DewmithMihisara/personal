@@ -9,175 +9,493 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
+      background: #f0f2f5;
       color: #222;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
+      padding: 2rem 1rem 4rem;
     }
 
+    .page { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── cards ── */
     .card {
       background: #fff;
       border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      padding: 2rem;
-      width: 100%;
-      max-width: 520px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 1.75rem;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      background: #0070f3;
+      color: #fff;
+      border-radius: 999px;
+      padding: 1px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
     }
 
-    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
-    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1.75rem; }
+    /* ── send form ── */
+    .send-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+    .send-grid .full { grid-column: 1 / -1; }
 
     label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: #444;
+      color: #555;
       margin-bottom: 0.3rem;
+      margin-top: 0.75rem;
     }
+    label:first-child { margin-top: 0; }
 
     input, textarea {
       width: 100%;
       border: 1px solid #ddd;
       border-radius: 6px;
-      padding: 0.6rem 0.8rem;
-      font-size: 0.95rem;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.92rem;
       font-family: inherit;
       outline: none;
       transition: border-color 0.15s;
-      margin-bottom: 1rem;
     }
-    input:focus, textarea:focus { border-color: #0070f3; }
-    textarea { resize: vertical; min-height: 90px; }
+    input:focus, textarea:focus { border-color: #0070f3; box-shadow: 0 0 0 3px rgba(0,112,243,0.12); }
+    textarea { resize: vertical; min-height: 80px; }
 
-    button {
-      width: 100%;
-      background: #0070f3;
-      color: #fff;
+    .btn {
       border: none;
       border-radius: 6px;
-      padding: 0.7rem;
-      font-size: 1rem;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.92rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, opacity 0.15s;
     }
-    button:hover  { background: #005dd1; }
-    button:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-primary { background: #0070f3; color: #fff; }
+    .btn-primary:hover { background: #005dd1; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ghost {
+      background: transparent;
+      color: #555;
+      border: 1px solid #ddd;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.82rem;
+    }
+    .btn-ghost:hover { background: #f5f5f5; }
+    .btn-danger { background: #fff0f0; color: #c0392b; border: 1px solid #f5c6c6; font-size: 0.82rem; padding: 0.45rem 0.9rem; }
+    .btn-danger:hover { background: #ffe0e0; }
+
+    .form-footer { margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; }
 
     .status {
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
+      flex: 1;
+      padding: 0.55rem 0.85rem;
       border-radius: 6px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       display: none;
     }
     .status.success { background: #e6f4ea; color: #1a7f37; display: block; }
     .status.error   { background: #fdecea; color: #c0392b; display: block; }
 
-    .tracking-id {
-      margin-top: 0.5rem;
+    .tracking-chip {
       font-family: monospace;
-      font-size: 0.85rem;
-      background: #f0f0f0;
-      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      background: #eef6ff;
+      color: #0050b3;
+      border: 1px solid #bfdbfe;
       border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    /* ── hits table ── */
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .auto-label {
+      font-size: 0.8rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-left: auto;
+    }
+    .auto-label input[type=checkbox] { accent-color: #0070f3; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    thead th {
+      background: #f8f9fa;
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      font-weight: 600;
+      color: #555;
+      border-bottom: 2px solid #eee;
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
+    tbody tr:hover { background: #fafbff; }
+    tbody tr.new-hit { animation: flash 1.2s ease; }
+    @keyframes flash {
+      0%   { background: #e8f0fe; }
+      100% { background: transparent; }
+    }
+    tbody td {
+      padding: 0.55rem 0.75rem;
+      vertical-align: top;
+      color: #333;
+    }
+    .cell-id     { font-family: monospace; color: #0050b3; font-size: 0.8rem; white-space: nowrap; }
+    .cell-time   { white-space: nowrap; color: #555; }
+    .cell-ip     { font-family: monospace; font-size: 0.8rem; white-space: nowrap; }
+    .cell-loc    { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #444; }
+    .cell-os     { white-space: nowrap; color: #444; }
+    .cell-client { white-space: nowrap; color: #333; font-weight: 500; }
+    .cell-lang   { white-space: nowrap; color: #666; font-size: 0.8rem; }
+
+    /* pill tags */
+    .pill {
       display: inline-block;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+    .pill-proxy  { background: #fff3cd; color: #856404; }
+    .pill-direct { background: #d1fae5; color: #065f46; }
+
+    /* legend */
+    .legend {
+      margin-top: 1.5rem;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+    .legend-title { font-size: 0.82rem; font-weight: 700; color: #444; margin-bottom: 0.6rem; }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.35rem 1.5rem;
+    }
+    .legend-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #555; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-yes { background: #22c55e; }
+    .dot-no  { background: #d1d5db; }
+
+    .empty-row td {
+      text-align: center;
+      padding: 2.5rem;
+      color: #aaa;
+      font-style: italic;
     }
 
-    .divider { border: none; border-top: 1px solid #eee; margin: 1.75rem 0; }
-
-    .info { font-size: 0.85rem; color: #555; line-height: 1.6; }
-    .info code {
-      background: #f4f4f4;
-      padding: 1px 5px;
-      border-radius: 3px;
+    /* ── pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .page-info { font-size: 0.82rem; color: #666; }
+    .page-btns { display: flex; gap: 0.4rem; }
+    .page-btn {
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 5px;
+      padding: 0.3rem 0.7rem;
       font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.1s;
     }
-    .info a { color: #0070f3; }
+    .page-btn:hover:not(:disabled) { background: #f0f4ff; border-color: #0070f3; color: #0070f3; }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-btn.active { background: #0070f3; color: #fff; border-color: #0070f3; }
+
+    .memory-note {
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 1rem;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+<div class="page">
 
+  <!-- ── Send Form ── -->
   <div class="card">
-    <h1>Email Pixel Tracker</h1>
-    <p class="subtitle">Academic demo &mdash; send a tracked HTML email and watch the open event in Vercel logs.</p>
-
+    <div class="card-title">Send Tracked Email</div>
     <form id="sendForm">
-      <label for="to">To</label>
-      <input type="email" id="to" placeholder="recipient@example.com" required />
-
-      <label for="subject">Subject</label>
-      <input type="text" id="subject" placeholder="Test tracked email" required />
-
-      <label for="message">Message <span style="font-weight:400;color:#888">(optional)</span></label>
-      <textarea id="message" placeholder="Hi, this is a tracked test email."></textarea>
-
-      <button type="submit" id="sendBtn">Send Email</button>
+      <div class="send-grid">
+        <div>
+          <label for="to">To</label>
+          <input type="email" id="to" placeholder="recipient@example.com" required />
+        </div>
+        <div>
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" placeholder="Test tracked email" required />
+        </div>
+        <div class="full">
+          <label for="message">Message <span style="font-weight:400;color:#aaa">(optional)</span></label>
+          <textarea id="message" placeholder="Hi, this is a tracked test email."></textarea>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" id="sendBtn">Send Email</button>
+        <div class="status" id="status"></div>
+      </div>
     </form>
+  </div>
 
-    <div class="status" id="status"></div>
+  <!-- ── Hits Dashboard ── -->
+  <div class="card">
+    <div class="card-title">
+      Collected Data
+      <span class="badge" id="totalBadge">0</span>
+    </div>
 
-    <hr class="divider" />
+    <div class="table-toolbar">
+      <button class="btn btn-ghost" id="refreshBtn">↻ Refresh</button>
+      <button class="btn btn-danger" id="clearBtn">✕ Clear</button>
+      <label class="auto-label">
+        <input type="checkbox" id="autoRefresh" checked />
+        Auto-refresh (5 s)
+      </label>
+    </div>
 
-    <div class="info">
-      <strong>How it works:</strong><br />
-      Each email contains a hidden 1&times;1 pixel at <code>/api/pixel?id=&lt;trackingId&gt;</code>.
-      When the recipient opens the email, their client fetches the image and
-      a hit is logged in <a href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel → Functions → Logs</a>
-      with the timestamp, IP address, and user-agent.
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tracking ID</th>
+            <th>Open Time</th>
+            <th>IP Address</th>
+            <th>Approx. Location</th>
+            <th>OS / Device</th>
+            <th>Email Client</th>
+            <th>Language</th>
+          </tr>
+        </thead>
+        <tbody id="hitsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span class="page-info" id="pageInfo">Showing 0 – 0 of 0</span>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+
+    <p class="memory-note">
+      Data is stored in server memory only — no database. Clears when the server restarts.
+    </p>
+
+    <!-- ── What is / isn't collected ── -->
+    <div class="legend">
+      <div class="legend-title">What this pixel collects</div>
+      <div class="legend-grid">
+        <div class="legend-row"><span class="dot dot-yes"></span>IP Address</div>
+        <div class="legend-row"><span class="dot dot-yes"></span>Approx. Location (via IP geolocation)</div>
+        <div class="legend-row"><span class="dot dot-yes"></span>OS + Device Type (User-Agent)</div>
+        <div class="legend-row"><span class="dot dot-yes"></span>Email Client (User-Agent)</div>
+        <div class="legend-row"><span class="dot dot-yes"></span>Preferred Language</div>
+        <div class="legend-row"><span class="dot dot-yes"></span>Open Timestamp</div>
+        <div class="legend-row"><span class="dot dot-no"></span>MAC Address — never leaves local network</div>
+        <div class="legend-row"><span class="dot dot-no"></span>Exact Email Address — not transmitted</div>
+      </div>
     </div>
   </div>
 
-  <img src="/api/pixel?id=page_load" width="1" height="1" style="opacity:0;position:absolute;" alt="" />
+</div>
 
-  <script>
-    const form    = document.getElementById("sendForm");
-    const btn     = document.getElementById("sendBtn");
-    const status  = document.getElementById("status");
+<!-- fire a page-load hit for instant demo -->
+<img src="/api/pixel?id=page_load" width="1" height="1" style="opacity:0;position:absolute;" alt="" />
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      btn.disabled = true;
-      btn.textContent = "Sending…";
-      status.className = "status";
-      status.innerHTML = "";
+<script>
+  /* ── state ── */
+  const PAGE_SIZE = 10;
+  let allHits  = [];
+  let currentPage = 1;
+  let prevTotal   = 0;
+  let autoTimer   = null;
 
-      const payload = {
-        to:      document.getElementById("to").value.trim(),
-        subject: document.getElementById("subject").value.trim(),
-        message: document.getElementById("message").value.trim(),
-      };
+  /* ── helpers ── */
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString() + " " + d.toLocaleTimeString();
+  }
 
-      try {
-        const res  = await fetch("/api/send", {
-          method:  "POST",
-          headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify(payload),
-        });
-        const data = await res.json();
+  function totalPages() {
+    return Math.max(1, Math.ceil(allHits.length / PAGE_SIZE));
+  }
 
-        if (res.ok) {
-          status.className = "status success";
-          status.innerHTML =
-            "Email sent! Watch Vercel logs for the open event.<br>" +
-            `Tracking ID: <span class="tracking-id">${data.trackingId}</span>`;
-          form.reset();
-        } else {
-          status.className = "status error";
-          status.textContent = "Error: " + (data.error || "Unknown error");
-        }
-      } catch (err) {
-        status.className = "status error";
-        status.textContent = "Network error: " + err.message;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Send Email";
+  /* ── render table ── */
+  function renderTable(isNew) {
+    const body  = document.getElementById("hitsBody");
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const slice = allHits.slice(start, start + PAGE_SIZE);
+
+    if (allHits.length === 0) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="8">No hits yet. Send a tracked email and open it to see data here.</td></tr>`;
+    } else {
+      body.innerHTML = slice.map((h, i) => {
+        const rowNum    = start + i + 1;
+        const isNewRow  = isNew && i < (allHits.length - prevTotal);
+        const isProxy   = /proxy|googleimage|yahoo/i.test(h.emailClient);
+        const clientTag = isProxy
+          ? `<span class="pill pill-proxy">via proxy</span> `
+          : `<span class="pill pill-direct">direct</span> `;
+        return `<tr class="${isNewRow ? "new-hit" : ""}">
+          <td>${rowNum}</td>
+          <td class="cell-id">${esc(h.id)}</td>
+          <td class="cell-time">${fmtTime(h.timestamp)}</td>
+          <td class="cell-ip">${esc(h.ip)}</td>
+          <td class="cell-loc" title="${esc(h.location)}">${esc(h.location)}</td>
+          <td class="cell-os" title="${esc(h.userAgent)}">${esc(h.os)} · ${esc(h.device)}</td>
+          <td class="cell-client">${clientTag}${esc(h.emailClient)}</td>
+          <td class="cell-lang">${esc(h.language)}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    /* page info */
+    const shown = allHits.length === 0 ? 0 : `${start + 1}–${Math.min(start + PAGE_SIZE, allHits.length)}`;
+    document.getElementById("pageInfo").textContent =
+      `Showing ${shown} of ${allHits.length}`;
+
+    /* badge */
+    document.getElementById("totalBadge").textContent = allHits.length;
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const tp   = totalPages();
+    const wrap = document.getElementById("pageBtns");
+    let html   = "";
+
+    html += `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>&laquo; Prev</button>`;
+
+    for (let p = 1; p <= tp; p++) {
+      if (tp > 7 && Math.abs(p - currentPage) > 2 && p !== 1 && p !== tp) {
+        if (p === currentPage - 3 || p === currentPage + 3) html += `<button class="page-btn" disabled>…</button>`;
+        continue;
       }
-    });
-  </script>
+      html += `<button class="page-btn ${p === currentPage ? "active" : ""}" onclick="goPage(${p})">${p}</button>`;
+    }
 
+    html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === tp ? "disabled" : ""}>Next &raquo;</button>`;
+    wrap.innerHTML = html;
+  }
+
+  function goPage(p) {
+    const tp = totalPages();
+    if (p < 1 || p > tp) return;
+    currentPage = p;
+    renderTable(false);
+  }
+  window.goPage = goPage; // expose for inline onclick
+
+  function esc(s) {
+    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  /* ── fetch hits ── */
+  async function fetchHits(showNew) {
+    try {
+      const res  = await fetch("/api/hits");
+      const data = await res.json();
+      const wasCount = allHits.length;
+      allHits = data.hits || [];
+      if (allHits.length > wasCount && currentPage > totalPages()) currentPage = 1;
+      renderTable(showNew && allHits.length > prevTotal);
+      prevTotal = allHits.length;
+    } catch (_) { /* silent on network error during auto-refresh */ }
+  }
+
+  /* ── auto-refresh ── */
+  function startAuto() {
+    autoTimer = setInterval(() => fetchHits(true), 5000);
+  }
+  function stopAuto() {
+    clearInterval(autoTimer);
+  }
+
+  document.getElementById("autoRefresh").addEventListener("change", e => {
+    e.target.checked ? startAuto() : stopAuto();
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", () => fetchHits(true));
+
+  /* ── clear ── */
+  document.getElementById("clearBtn").addEventListener("click", async () => {
+    if (!confirm("Clear all collected hits from memory?")) return;
+    await fetch("/api/hits", { method: "DELETE" });
+    prevTotal = 0;
+    currentPage = 1;
+    fetchHits(false);
+  });
+
+  /* ── send form ── */
+  const sendForm = document.getElementById("sendForm");
+  const sendBtn  = document.getElementById("sendBtn");
+  const statusEl = document.getElementById("status");
+
+  sendForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending…";
+    statusEl.className = "status";
+    statusEl.innerHTML = "";
+
+    try {
+      const res  = await fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to:      document.getElementById("to").value.trim(),
+          subject: document.getElementById("subject").value.trim(),
+          message: document.getElementById("message").value.trim(),
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        statusEl.className = "status success";
+        statusEl.innerHTML = `Email sent! Tracking ID: <span class="tracking-chip">${esc(data.trackingId)}</span>`;
+        sendForm.reset();
+        setTimeout(() => fetchHits(true), 500);
+      } else {
+        statusEl.className = "status error";
+        statusEl.textContent = "Error: " + (data.error || "Unknown error");
+      }
+    } catch (err) {
+      statusEl.className = "status error";
+      statusEl.textContent = "Network error: " + err.message;
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Send Email";
+    }
+  });
+
+  /* ── init ── */
+  fetchHits(false);
+  startAuto();
+</script>
 </body>
 </html>
