@@ -2,48 +2,182 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pixel Tracker – Academic Demo</title>
   <style>
-    body { font-family: sans-serif; max-width: 640px; margin: 3rem auto; line-height: 1.6; color: #222; }
-    h1 { color: #111; }
-    code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-    pre  { background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
-    a    { color: #0070f3; }
-    .note { background: #fff8e1; border-left: 4px solid #f0c040; padding: 0.6rem 1rem; margin: 1rem 0; border-radius: 4px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 2rem;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 1.75rem; }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 0.3rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 1rem;
+    }
+    input:focus, textarea:focus { border-color: #0070f3; }
+    textarea { resize: vertical; min-height: 90px; }
+
+    button {
+      width: 100%;
+      background: #0070f3;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover  { background: #005dd1; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+
+    .status {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status.success { background: #e6f4ea; color: #1a7f37; display: block; }
+    .status.error   { background: #fdecea; color: #c0392b; display: block; }
+
+    .tracking-id {
+      margin-top: 0.5rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      background: #f0f0f0;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .divider { border: none; border-top: 1px solid #eee; margin: 1.75rem 0; }
+
+    .info { font-size: 0.85rem; color: #555; line-height: 1.6; }
+    .info code {
+      background: #f4f4f4;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.82rem;
+    }
+    .info a { color: #0070f3; }
   </style>
 </head>
 <body>
-  <h1>Email Pixel Tracker</h1>
-  <p>Academic demonstration of email open tracking via a 1&times;1 transparent GIF.</p>
 
-  <h2>How it works</h2>
-  <p>
-    When an HTML email contains an <code>&lt;img&gt;</code> tag pointing to this server,
-    the recipient's email client fetches the image on open. The server records the
-    timestamp, IP address, user-agent, and any custom tracking ID — then returns the
-    invisible pixel so the recipient notices nothing.
-  </p>
+  <div class="card">
+    <h1>Email Pixel Tracker</h1>
+    <p class="subtitle">Academic demo &mdash; send a tracked HTML email and watch the open event in Vercel logs.</p>
 
-  <h2>Embed in an email</h2>
-  <pre>&lt;img
-  src="https://YOUR-DOMAIN.vercel.app/api/pixel?id=YOUR_ID"
-  width="1" height="1" style="opacity:0;"
-/&gt;</pre>
+    <form id="sendForm">
+      <label for="to">To</label>
+      <input type="email" id="to" placeholder="recipient@example.com" required />
 
-  <p>Replace <code>YOUR_ID</code> with any label (e.g. <code>laptop_test</code>) to
-  identify which email or recipient triggered the hit.</p>
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" placeholder="Test tracked email" required />
 
-  <h2>Live test</h2>
-  <p>Click the link below to fire a test hit, then check
-  <strong>Vercel dashboard → your project → Functions → Logs</strong>.</p>
-  <p><a href="/api/pixel?id=manual_test">Fire test pixel &rarr;</a></p>
+      <label for="message">Message <span style="font-weight:400;color:#888">(optional)</span></label>
+      <textarea id="message" placeholder="Hi, this is a tracked test email."></textarea>
 
-  <div class="note">
-    <strong>Note:</strong> This project is for academic research only.
-    It demonstrates how email tracking pixels work at a technical level.
+      <button type="submit" id="sendBtn">Send Email</button>
+    </form>
+
+    <div class="status" id="status"></div>
+
+    <hr class="divider" />
+
+    <div class="info">
+      <strong>How it works:</strong><br />
+      Each email contains a hidden 1&times;1 pixel at <code>/api/pixel?id=&lt;trackingId&gt;</code>.
+      When the recipient opens the email, their client fetches the image and
+      a hit is logged in <a href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel → Functions → Logs</a>
+      with the timestamp, IP address, and user-agent.
+    </div>
   </div>
 
-  <!-- fires automatically on page load so you can see a hit in logs immediately -->
-  <img src="/api/pixel?id=page_load" width="1" height="1" style="opacity:0;" alt="" />
+  <img src="/api/pixel?id=page_load" width="1" height="1" style="opacity:0;position:absolute;" alt="" />
+
+  <script>
+    const form    = document.getElementById("sendForm");
+    const btn     = document.getElementById("sendBtn");
+    const status  = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+      status.className = "status";
+      status.innerHTML = "";
+
+      const payload = {
+        to:      document.getElementById("to").value.trim(),
+        subject: document.getElementById("subject").value.trim(),
+        message: document.getElementById("message").value.trim(),
+      };
+
+      try {
+        const res  = await fetch("/api/send", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          status.className = "status success";
+          status.innerHTML =
+            "Email sent! Watch Vercel logs for the open event.<br>" +
+            `Tracking ID: <span class="tracking-id">${data.trackingId}</span>`;
+          form.reset();
+        } else {
+          status.className = "status error";
+          status.textContent = "Error: " + (data.error || "Unknown error");
+        }
+      } catch (err) {
+        status.className = "status error";
+        status.textContent = "Network error: " + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Send Email";
+      }
+    });
+  </script>
+
 </body>
 </html>
